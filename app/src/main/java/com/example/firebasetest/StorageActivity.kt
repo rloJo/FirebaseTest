@@ -88,10 +88,5 @@ class StorageActivity : AppCompatActivity() {
             }
 
         }
-
-
     }
-
-
-
 }
