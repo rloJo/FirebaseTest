@@ -1,77 +1,82 @@
 package com.example.firebasetest
 
+
 import android.graphics.BitmapFactory
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
 import com.example.firebasetest.databinding.ActivityRemoteConfigBinding
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 
+
 class RemoteConfigActivity : AppCompatActivity() {
-    companion object {
-        const val imgSpringURL = "gs://android-kotlin-lecture.appspot.com/season/spring.jpg"
-        const val imgSummerURL = "gs://android-kotlin-lecture.appspot.com/season/summer.jpg"
-        const val imgFallURL = "gs://android-kotlin-lecture.appspot.com/season/fall.jpg"
-        const val imgWinterURL = "gs://android-kotlin-lecture.appspot.com/season/winter.jpg"
-    }
-
-    private val remoteConfig = Firebase.remoteConfig
-    private lateinit var binding: ActivityRemoteConfigBinding
-
+    lateinit var binding: ActivityRemoteConfigBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRemoteConfigBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 1 // For test purpose only, 3600 seconds for production
-        }
-        remoteConfig.setConfigSettingsAsync(configSettings)
-        remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
+        updateImg()
 
-        binding.buttonFetchActivate.setOnClickListener {
-            remoteConfig.fetchAndActivate()
-                .addOnCompleteListener(this) {
-                    val yourPrice = remoteConfig.getLong("your_price")
-                    val cheatEnabled = remoteConfig.getBoolean("cheat_enabled")
-                    binding.textYourPrice.text = yourPrice.toString()
-                    binding.textCheatEnabled.text = cheatEnabled.toString()
-                }
-        }
-
-        refreshImage()
-
-        binding.refresh.setOnClickListener {
-            refreshImage()
+        binding.refreshimg.setOnClickListener {
+            updateImg()
         }
     }
+    private fun updateImg(){
+        val rootRef = Firebase.storage.reference
+        val remoteConfig = Firebase.remoteConfig
 
-    private fun refreshImage() {
-        remoteConfig.fetchAndActivate()
-            .addOnCompleteListener(this) {
-                if (it.isSuccessful) {
-                    val season = remoteConfig.getString("season")
-                    val imgRef = when (season) {
-                        "spring" -> Firebase.storage.getReferenceFromUrl(imgSpringURL)
-                        "summer" -> Firebase.storage.getReferenceFromUrl(imgSummerURL)
-                        "fall" -> Firebase.storage.getReferenceFromUrl(imgFallURL)
-                        else -> Firebase.storage.getReferenceFromUrl(imgWinterURL)
+        remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
+        val settings = remoteConfigSettings {
+            minimumFetchIntervalInSeconds = 1
+        }
+
+        remoteConfig.setConfigSettingsAsync(settings)
+
+        remoteConfig.fetchAndActivate().addOnSuccessListener {
+            val season = remoteConfig.getString("season")
+            println("########### $season")
+            when (season) {
+                "spring" -> {
+                    val spring = rootRef.child("Spring.png")
+                    spring.getBytes(Long.MAX_VALUE).addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            val bmp = BitmapFactory.decodeByteArray(it.result, 0, it.result!!.size)
+                            binding.imageView.setImageBitmap(bmp)
+                        }
                     }
-                    displayImageRef(imgRef, binding.imageView)
+                }
+                "summer" -> {
+                    val summer = rootRef.child("Summer.png")
+                    summer.getBytes(Long.MAX_VALUE).addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            val bmp = BitmapFactory.decodeByteArray(it.result, 0, it.result!!.size)
+                            binding.imageView.setImageBitmap(bmp)
+                        }
+                    }
+                }
+                "fall" -> {
+                    val fall = rootRef.child("Fall.png")
+                    fall.getBytes(Long.MAX_VALUE).addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            val bmp = BitmapFactory.decodeByteArray(it.result, 0, it.result!!.size)
+                            binding.imageView.setImageBitmap(bmp)
+                        }
+                    }
+                }
+                "winter" -> {
+                    val winter = rootRef.child("Winter.png")
+                    winter.getBytes(Long.MAX_VALUE).addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            val bmp = BitmapFactory.decodeByteArray(it.result, 0, it.result!!.size)
+                            binding.imageView.setImageBitmap(bmp)
+                        }
+                    }
                 }
             }
-    }
 
-    private fun displayImageRef(imageRef: StorageReference?, view: ImageView) {
-        imageRef?.getBytes(Long.MAX_VALUE)?.addOnSuccessListener {
-            val bmp = BitmapFactory.decodeByteArray(it, 0, it.size)
-            view.setImageBitmap(bmp)
-        }?.addOnFailureListener {
-            // Failed to download the image
         }
     }
 }
