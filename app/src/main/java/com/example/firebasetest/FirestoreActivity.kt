@@ -15,7 +15,7 @@ class FirestoreActivity : AppCompatActivity() {
     private lateinit var binding: ActivityFirestoreBinding
     private var adapter: MyAdapter? = null
     private val db: FirebaseFirestore = Firebase.firestore
-    private val itemsCollectionRef = db.collection("items")
+    private val itemsCollectionRef = db.collection("items") //itemsd에 대한 레퍼런스
     private var snapshotListener: ListenerRegistration? = null
 
 
@@ -103,13 +103,16 @@ class FirestoreActivity : AppCompatActivity() {
         val price = binding.editPrice.text.toString().toInt()
         val autoID = binding.checkAutoID.isChecked
         val itemID = binding.editID.text.toString()
+        val stockCheck = binding.InStock.isChecked
+
         if (!autoID and itemID.isEmpty()) {
             Snackbar.make(binding.root, "Input ID or check Auto-generate ID!", Snackbar.LENGTH_SHORT).show()
             return
         }
         val itemMap = hashMapOf(
             "name" to name,
-            "price" to price
+            "price" to price,
+            "InStock" to stockCheck
         )
         if (autoID) {
             itemsCollectionRef.add(itemMap)
@@ -160,7 +163,7 @@ class FirestoreActivity : AppCompatActivity() {
             .addOnSuccessListener { queryItem(itemID) }
     }
 
-    private fun queryWhere() {
+    /* private fun queryWhere() {
         val p = 100
         binding.progressWait.visibility = View.VISIBLE
         itemsCollectionRef.whereLessThan("price", p).get()
@@ -172,6 +175,24 @@ class FirestoreActivity : AppCompatActivity() {
                 }
                 AlertDialog.Builder(this)
                     .setTitle("Items which price less than $p")
+                    .setItems(items.toTypedArray(), { dialog, which ->  }).show()
+            }
+            .addOnFailureListener {
+                binding.progressWait.visibility = View.GONE
+            }
+    } */
+
+    private fun queryWhere() {
+        binding.progressWait.visibility = View.VISIBLE
+        itemsCollectionRef.whereEqualTo("InStock", true).get()
+            .addOnSuccessListener {
+                binding.progressWait.visibility = View.GONE
+                val items = arrayListOf<String>()
+                for (doc in it) {
+                    items.add("${doc["name"]} - ${doc["price"]}")
+                }
+                AlertDialog.Builder(this)
+                    .setTitle("Items which InStock is equal to True")
                     .setItems(items.toTypedArray(), { dialog, which ->  }).show()
             }
             .addOnFailureListener {

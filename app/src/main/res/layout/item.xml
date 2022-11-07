@@ -9,11 +9,17 @@
         android:id="@+id/textID"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:text="TextView" />
 
     <TextView
         android:id="@+id/textName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="TextView" />
+    <TextView
+        android:id="@+id/textStock"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"

@@ -7,11 +7,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.firebasetest.databinding.ItemBinding
 import com.google.firebase.firestore.QueryDocumentSnapshot
 
-data class Item(val id: String, val name: String, val price: Int) {
+data class Item(val id: String, val name: String, val price: Int, val InStock:Boolean) {
     constructor(doc: QueryDocumentSnapshot) :
-            this(doc.id, doc["name"].toString(), doc["price"].toString().toIntOrNull() ?: 0)
+            this(doc.id, doc["name"].toString(), doc["price"].toString().toIntOrNull() ?: 0 , doc["InStock"] as Boolean)
     constructor(key: String, map: Map<*, *>) :
-            this(key, map["name"].toString(), map["price"].toString().toIntOrNull() ?: 0)
+            this(key, map["name"].toString(), map["price"].toString().toIntOrNull() ?: 0, map["InStock"] as Boolean)
 }
 
 class MyViewHolder(val binding: ItemBinding) : RecyclerView.ViewHolder(binding.root)
@@ -44,6 +44,7 @@ class MyAdapter(private val context: Context, private var items: List<Item>)
         val item = items[position]
         holder.binding.textID.text = item.id
         holder.binding.textName.text = item.name
+        holder.binding.textStock.text = item.InStock.toString()
         holder.binding.textID.setOnClickListener {
             //AlertDialog.Builder(context).setMessage("You clicked ${student.name}.").show()
             itemClickListener?.onItemClick(item.id)
