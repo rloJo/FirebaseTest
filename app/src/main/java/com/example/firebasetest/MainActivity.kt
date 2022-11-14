@@ -22,6 +22,9 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val msg: String = intent?.getStringExtra("message") ?:""
+        binding.messageView.setText(msg)
+
         if (Firebase.auth.currentUser == null) {
             startActivity(
                 Intent(this, LoginActivity::class.java))
